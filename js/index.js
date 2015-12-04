@@ -25,8 +25,8 @@ function successCB() {
 	console.log("success!");
 }
 
-setInterval(bajardatos, 100000);
-setInterval(subirdatos, 50000);
+setInterval(bajardatos, 1200000);
+setInterval(subirdatos, 600000);
 
 $(document).keypress(function(e){
 	if(e.which == 13){
