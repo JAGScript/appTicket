@@ -125,6 +125,8 @@ function insertarDatos(idurl){
 		});
 		count++;
 	});
+	$('#waitbajar').fadeOut('slow');
+	$('#btnbajar').delay(600).fadeIn('slow');
 	
 	if(idurl == 1){
 		setTimeout("window.location='subpages/ingreso.html';",90000);
@@ -144,8 +146,10 @@ function validarIngreso(){
 	var codigo = $('#codigo').val();
 	var cedula = $('#cedula').val();
 	if((codigo == '') || (cedula == '')){
-		$('#sms').modal('show');
+		$('#error1').modal('show');
 	}else{
+		$('#btnvalidar').fadeOut('slow');
+		$('#waitvalidar').delay(600).fadeIn('slow');
 		// alert(codigo+' - '+cedula);
 		var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
 		db.transaction(function(tx){
@@ -185,6 +189,8 @@ function validarIngreso(){
 					$('#mensaje').html('Datos Incorrectos!');
 					$('#sms').modal('show');
 				}
+				$('#waitvalidar').fadeOut('slow');
+				$('#btnvalidar').delay(600).fadeIn('slow');
 			},errorCB,successCB);
 		});
 		setTimeout("$('.smsback').css('background-color','#fff'); $('#titlemodal').html(''); $('#mensaje').html(''); $('#nombre').html(''); $('#sms').modal('hide'); $('#codigo').val(''); $('#cedula').val(''); $('#codigo').focus();",2500);
@@ -192,6 +198,8 @@ function validarIngreso(){
 }
 
 function bajardatos(){
+	$('#btnbajar').fadeOut('slow');
+	$('#waitbajar').delay(600).fadeIn('slow');
 	$.get("http://www.lcodigo.com/ticket/apiMovil/bajarMovil.php").done(function(response){
 		if(response != 'error'){
 			
@@ -232,6 +240,8 @@ function bajardatos(){
 }
 
 function subirdatos(){
+	$('#btnsubir').fadeOut('slow');
+	$('#waitsubir').delay(600).fadeIn('slow');
 	var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
 	db.transaction(function(tx){
 		tx.executeSql('SELECT * FROM Boleto;',[],function(tx,results){
@@ -248,6 +258,8 @@ function subirdatos(){
 			var valores = datos.substring(0,datos.length -1);
 			$.get("http://www.lcodigo.com/ticket/apiMovil/subidaMovil.php?datos="+valores).done(function(response){
 				console.log(response);
+				$('#waitsubir').fadeOut('slow');
+				$('#btnsubir').delay(600).fadeIn('slow');
 			});
 		},errorCB,successCB);
 	});
@@ -263,6 +275,11 @@ function cedulaManual(){
 				var row = results.rows.item(0);
 				var cedula = row.documentoHISB;
 				$('#cedula').val(cedula);
+			}else{
+				$('#error2').modal('show');
+				$('#codigo').val('');
+				$('#cedula').val('');
+				$('#codigo').focus();
 			}
 		},errorCB,successCB);
 	});

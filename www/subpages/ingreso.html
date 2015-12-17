@@ -16,14 +16,16 @@
 				<img src="../img/ticketfacilnegro.png" style="width:100%; max-width:250px;" />
 			</div>
 			<div class="col-lg-9" style="text-align:right; vertical-align:middle; padding:20px 0px;">
-				<button class="btn btn-success" type="button" onclick="bajardatos()">
+				<button class="btn btn-success" type="button" onclick="bajardatos()" id="btnbajar">
 					<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>
 					Download
 				</button>
-				<button class="btn btn-primary" type="button" onclick="subirdatos()">
+				<img src="../img/loading.gif" style="max-width:25px;" id="waitbajar" />
+				<button class="btn btn-primary" type="button" onclick="subirdatos()" id="btnsubir">
 					<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
 					Upload
 				</button>
+				<img src="../img/loading.gif" style="max-width:25px;" id="waitsubir" />
 				<button class="btn btn-danger" type="button" onclick="logout()">
 					<span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
 					Log Out
@@ -57,7 +59,8 @@
 		</div>
 		<div class="row" style="margin-top:2%;">
 			<div class="col-lg-12" style="text-align:center;">
-				<button type="button" class="btn btn-primary" onclick="validarIngreso()">VALIDAR</button>
+				<button type="button" class="btn btn-primary" onclick="validarIngreso()" id="btnvalidar">VALIDAR</button><br>
+				<img src="../img/loading.gif" style="max-width:25px;" id="waitvalidar" />
 			</div>
 		</div>
 		<div class="modal fade" id="sms" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -81,6 +84,48 @@
 				</div>
 			</div>
 		</div>
+		<div class="modal fade" id="error1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header" style="background-color:#C51D34; color:#fff;">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="myModalLabel">Alerta!</h4>
+					</div>
+					<div class="modal-body">
+						<div class="alert alert-warning" role="alert">
+							<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>&nbsp;
+							<strong>Alerta! </strong>Los campos están vacios.
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="error2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header" style="background-color:#C51D34; color:#fff;">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="myModalLabel">Alerta!</h4>
+					</div>
+					<div class="modal-body">
+						<div class="alert alert-danger" role="alert">
+							<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>&nbsp;
+							<strong>Alerta! </strong>El código ingresado es incorrecto.
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Aceptar</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
 <script>
@@ -95,7 +140,6 @@ function saltar(e){
 }
 
 function logout(){
-	$('#control').fadeOut('slow');
-	$('#login').delay(600).fadeIn('slow');
+	window.location = '../index.html'; 
 }
 </script>
