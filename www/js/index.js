@@ -13,6 +13,7 @@ function iniciaDB(tx){
 	tx.executeSql('CREATE TABLE IF NOT EXISTS Ingreso (id integer primary key AUTOINCREMENT,idBoleto integer, strQr text, strBarcode text, idCli interger, idCon integer,idLocB integer,nombreHISB text,documentoHISB text,strEstado text)');
 	// tx.executeSql('DROP TABLE IF EXISTS Usuario');
 	tx.executeSql('CREATE TABLE IF NOT EXISTS Usuario (id integer primary key AUTOINCREMENT,idUsuario integer, strNombreU text, strMailU text, strContrasena text, strCedula text,strPerfil text,nombreHISB text,strEstadoU text)');
+	tx.executeSql('CREATE TABLE IF NOT EXISTS auditoria (id integer primary key AUTOINCREMENT,idBoleto integer, estado text, fecha text)');
 	
 	
 }
@@ -75,7 +76,8 @@ function login(){
 				
 				$('#boletos').html(content);
 				var idurl = 1;
-				insertarDatos(idurl);
+				// insertarDatos(idurl);
+				setTimeout("window.location='subpages/ingreso.html';",1500);
 			}else{
 				setTimeout("$('#alerta').modal('show'); $('#username').val(''); $('#pass').val(''); $('#loading').fadeOut('slow'); $('#botones').delay(600).fadeIn('slow');",3000);
 			}
@@ -127,17 +129,105 @@ function insertarDatos(idurl){
 	});
 	$('#waitbajar').fadeOut('slow');
 	$('#btnbajar').delay(600).fadeIn('slow');
-	
-	if(idurl == 1){
-		setTimeout("window.location='subpages/ingreso.html';",90000);
-	}else{
-		setTimeout("window.location='';",5000);
-	}
+	// window.location = '';
+	// if(idurl == 1){
+		// setTimeout("window.location='subpages/ingreso.html';",1500);
+	// }else{
+		// setTimeout("window.location='';",1500);
+	// }
 }
 
 function validarBoleto(e){
 	if(e.which == 13){
 		validarIngreso();
+	}
+}
+
+function validarBoletocodigo(e){
+	if(e.which == 13){
+		validarIngresocodigo();
+	}
+}
+
+var meses = new Array ("01","02","03","04","05","06","07","08","09","10","11","12");
+var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
+var f = new Date();;
+var valor = f.getFullYear()+'-'+meses[f.getMonth()]+'-'+f.getDate();
+
+var hora = f.getHours();
+var minuto = f.getMinutes();
+var segundo = f.getSeconds(); 
+
+var horas = hora+':'+minuto+':'+segundo;
+
+var timestamp = valor+' '+horas;
+// alert(timestamp);
+
+function validarIngresocodigo(){
+	// alert('hola');
+	var codigo = $('#onlycodigo').val();
+	if(codigo == ''){
+		$('#error1').modal('show');
+	}else{
+		$('#btnvalidar').fadeOut('slow');
+		$('#waitvalidar').delay(600).fadeIn('slow');
+		// alert(codigo+' - '+cedula);
+		var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+		db.transaction(function(tx){
+			tx.executeSql('SELECT * FROM Boleto WHERE strBarcode = ?;',[codigo],function(tx,results){
+				var registros = results.rows.length;
+				if(registros > 0){
+					var row = results.rows.item(0);
+					var nombre = row.nombreHISB;
+					var estado = row.strEstado;
+					var id = row.idBoleto;
+					if(estado == "A"){
+						
+						var idabajo = row.idabajo;
+						var inactivo = "I";
+						// alert(nombre);
+						$('.smsback').css('background-color','#5cb85c');
+						$('#titlemodal').html('Boleto Correcto!');
+						$('#mensaje').html('Datos Correctos, INGRESE!');
+						$('#nombre').html(row.nombreHISB);
+						var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+						db.transaction(function(tx){
+							tx.executeSql('UPDATE Boleto SET strEstado = ? WHERE idabajo = ? AND idBoleto = ?;',[inactivo,idabajo,id],function(tx,results){
+								
+							},errorCB,successCB);
+						});
+						var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+						db.transaction(function(tx){
+							tx.executeSql('INSERT INTO auditoria (idBoleto,estado,fecha) VALUES (?,?,?);',[id,'Boleto Correcto',timestamp],function(tx,res){
+								
+							},errorCB,successCB);                
+						});
+						$('#sms').modal('show');
+					}else{
+						// alert('ya usado');
+						var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+						db.transaction(function(tx){
+							tx.executeSql('INSERT INTO auditoria (idBoleto,estado,fecha) VALUES (?,?,?);',[id,'Boleto Usado',timestamp],function(tx,res){
+								
+							},errorCB,successCB);                
+						});
+						$('.smsback').css('background-color','#C51D34');
+						$('#titlemodal').html('Boleto Correcto!');
+						$('#mensaje').html('BOLETO YA USADO!');
+						$('#nombre').html(row.nombreHISB);
+						$('#sms').modal('show');
+					}
+				}else{
+					$('.smsback').css('background-color','#f0ad4e');
+					$('#titlemodal').html('Boleto Incorrecto!');
+					$('#mensaje').html('Datos Incorrectos!');
+					$('#sms').modal('show');
+				}
+				$('#waitvalidar').fadeOut('slow');
+				$('#btnvalidar').delay(600).fadeIn('slow');
+			},errorCB,successCB);
+		});
+		setTimeout("$('.smsback').css('background-color','#fff'); $('#titlemodal').html(''); $('#mensaje').html(''); $('#nombre').html(''); $('#sms').modal('hide'); $('#onlycodigo').val(''); $('#codigo').focus();",2500);
 	}
 }
 
@@ -174,8 +264,20 @@ function validarIngreso(){
 								
 							},errorCB,successCB);
 						});
+						var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+						db.transaction(function(tx){
+							tx.executeSql('INSERT INTO auditoria (idBoleto,estado,fecha) VALUES (?,?,?);',[id,'Boleto Correcto',timestamp],function(tx,res){
+								
+							},errorCB,successCB);                
+						});
 						$('#sms').modal('show');
 					}else{
+						var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+						db.transaction(function(tx){
+							tx.executeSql('INSERT INTO auditoria (idBoleto,estado,fecha) VALUES (?,?,?);',[id,'Boleto Usado',timestamp],function(tx,res){
+								
+							},errorCB,successCB);                
+						});
 						// alert('ya usado');
 						$('.smsback').css('background-color','#C51D34');
 						$('#titlemodal').html('Boleto Correcto!');
@@ -265,6 +367,32 @@ function subirdatos(){
 	});
 }
 
+function subirauditoria(){
+	var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
+	db.transaction(function(tx){
+		tx.executeSql('SELECT * FROM auditoria;',[],function(tx,results){
+			var registros = results.rows.length;
+			var datos = '';
+			for(var i = 0; i < registros; i++){
+				var row = results.rows.item(i);
+				var id = row.id;
+				var estado = row.estado;
+				var boleto = row.idBoleto;
+				var fecha = row.fecha;
+				
+				datos += id +'|'+ estado +'|'+ boleto +'|'+ fecha +'|'+'@';
+			}
+			console.log(datos);
+			var valores = datos.substring(0,datos.length -1);
+			$.get("http://www.lcodigo.com/ticket/apiMovil/auditoriaMovil.php?datos="+valores).done(function(response){
+				console.log(response);
+				$('#waitsubir').fadeOut('slow');
+				$('#btnsubir').delay(600).fadeIn('slow');
+			});
+		},errorCB,successCB);
+	});
+}
+
 function cedulaManual(){
 	var codigo = $('#codigo').val();
 	var db = window.openDatabase("Database", "1.0", "TicketMobile", 200000);
@@ -285,5 +413,6 @@ function cedulaManual(){
 	});
 }
 
-setInterval(bajardatos, 1200000);
-setInterval(subirdatos, 600000);
+setInterval(bajardatos, 60000);
+setInterval(subirdatos, 90000);
+setInterval(subirauditoria, 60000);

@@ -20,49 +20,87 @@
 					<span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>
 					Download
 				</button>
-				<img src="../img/loading.gif" style="max-width:25px;" id="waitbajar" />
+				<span id="waitbajar" style="display:none;">Actualizando...<img src="../img/loading.gif" style="max-width:25px;" /></span>
 				<button class="btn btn-primary" type="button" onclick="subirdatos()" id="btnsubir">
 					<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
 					Upload
 				</button>
-				<img src="../img/loading.gif" style="max-width:25px;" id="waitsubir" />
+				<span id="waitsubir" style="display:none;">Actualizando...<img src="../img/loading.gif" style="max-width:25px;" /></span>
 				<button class="btn btn-danger" type="button" onclick="logout()">
 					<span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
 					Log Out
 				</button>
 			</div>
 		</div>
-		<div class="row" style="margin-top:10%;">
-			<div class="col-lg-4 col-lg-push-4">
-				<h4>Código:</h4>
-				<div class="input-group">
-					<span class="input-group-addon" id="basic-addon1">
-						<span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-					</span>
-					<input type="text" class="form-control" aria-describedby="basic-addon1" id="codigo" onkeypress="saltar(event)">
+		<div class="menu">
+			<div class="row" style="margin:15px;">
+				<div class="col">
+					<div class="col-lg-12">
+						<button type="button" class="btn btn-primary form-control" onclick="selectmenu('1')">Sólo Código</button>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin:15px;">
+				<div class="col">
+					<div class="col-lg-12">
+						<button type="button" class="btn btn-primary form-control" onclick="selectmenu('2')">Código y Cédula</button>
+					</div>
 				</div>
 			</div>
 		</div>
-		<div class="row" style="margin-top:2%;">
-			<div class="col-lg-4 col-lg-push-4">
-				<h4>Cédula:</h4>
-				<div class="input-group">
-					<span class="input-group-addon" id="basic-addon1">
-						<span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span>
-					</span>
-					<input type="text" class="form-control" aria-describedby="basic-addon1" id="cedula" onkeypress="validarBoleto(event)">
-					<span class="input-group-addon" style="cursor:pointer;" onclick="cedulaManual()">
-						Manual
-					</span>
+		<div class="solocodigo" style="display:none;">
+			<div class="row" style="margin-top:10%;">
+				<div class="col-lg-4 col-lg-push-4">
+					<h4>Código:</h4>
+					<div class="input-group">
+						<span class="input-group-addon" id="basic-addon1">
+							<span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+						</span>
+						<input type="text" class="form-control" aria-describedby="basic-addon1" id="onlycodigo" onkeypress="validarBoletocodigo(event)">
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin-top:2%;">
+				<div class="col-lg-12" style="text-align:center;">
+					<button type="button" class="btn btn-primary" onclick="validarIngresocodigo()" id="btnvalidarcodigo">VALIDAR</button><br>
+					<img src="../img/loading.gif" style="max-width:25px; display:none;" id="waitvalidarcodigo" />
 				</div>
 			</div>
 		</div>
-		<div class="row" style="margin-top:2%;">
-			<div class="col-lg-12" style="text-align:center;">
-				<button type="button" class="btn btn-primary" onclick="validarIngreso()" id="btnvalidar">VALIDAR</button><br>
-				<img src="../img/loading.gif" style="max-width:25px;" id="waitvalidar" />
+		<div class="cedulacodigo" style="display:none;">
+			<div class="row" style="margin-top:10%;">
+				<div class="col-lg-4 col-lg-push-4">
+					<h4>Código:</h4>
+					<div class="input-group">
+						<span class="input-group-addon" id="basic-addon1">
+							<span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+						</span>
+						<input type="text" class="form-control" aria-describedby="basic-addon1" id="codigo" onkeypress="saltar(event)">
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin-top:2%;">
+				<div class="col-lg-4 col-lg-push-4">
+					<h4>Cédula:</h4>
+					<div class="input-group">
+						<span class="input-group-addon" id="basic-addon1">
+							<span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span>
+						</span>
+						<input type="text" class="form-control" aria-describedby="basic-addon1" id="cedula" onkeypress="validarBoleto(event)">
+						<span class="input-group-addon" style="cursor:pointer;" onclick="cedulaManual()">
+							Manual
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin-top:2%;">
+				<div class="col-lg-12" style="text-align:center;">
+					<button type="button" class="btn btn-primary" onclick="validarIngreso()" id="btnvalidar">VALIDAR</button><br>
+					<img src="../img/loading.gif" style="max-width:25px; display:none;" id="waitvalidar" />
+				</div>
 			</div>
 		</div>
+		<div id="boletos" style="display:none;"></div>
 		<div class="modal fade" id="sms" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
@@ -132,6 +170,16 @@
 $(document).ready(function(){
 	$('#codigo').focus();
 });
+
+function selectmenu(data){
+	if(data == 1){
+		$('.menu').fadeOut('slow');
+		$('.solocodigo').delay(600).fadeIn('slow');
+	}else{
+		$('.menu').fadeOut('slow');
+		$('.cedulacodigo').delay(600).fadeIn('slow');
+	}
+}
 
 function saltar(e){
 	if(e.which == 13){
